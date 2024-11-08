@@ -1,5 +1,7 @@
 package javacode.jwtsecurity.config;
 
+
+import javacode.jwtsecurity.filter.LoggingFilter;
 import javacode.jwtsecurity.jwt.AuthEntryPointJwt;
 import javacode.jwtsecurity.userdetails.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +37,15 @@ public class WebSecurityConfig {
     private AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
+    public LoggingFilter loggingFilter() {
+        return new LoggingFilter();
+    }
+
+    @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
     }
+
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -61,6 +69,7 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/test/**").permitAll()
                                 .anyRequest().authenticated());
+        http.addFilterBefore(loggingFilter(), UsernamePasswordAuthenticationFilter.class);
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
